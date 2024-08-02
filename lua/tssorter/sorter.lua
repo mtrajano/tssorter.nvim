@@ -3,16 +3,27 @@ local logger = require('tssorter.logger')
 
 local M = {}
 
+---@class SorterOpts
+---@field sortable string?
+---@field reverse boolean?
+
 ---@type Sortable
 M.config = {}
 
---- Returns the nodes in a sorted order
-local function get_sorted_lines(lines)
-  -- TODO: provide other abilities for sorting such as reverse, custom sort functions, etc..
+--- Returns the retrieved lines in a sorted order
+---@param lines string[]
+---@param opts SorterOpts
+---@return string[]
+local function get_sorted_lines(lines, opts)
+  -- TODO: provide other abilities for sorting such as custom sort functions, etc..
   table.sort(lines, function(val1, val2)
     -- TODO: this should probably be handled by the ordinal TSNode
     return vim.trim(val1) < vim.trim(val2)
   end)
+
+  if opts.reverse then
+    lines = vim.iter(lines):rev():totable()
+  end
 
   return lines
 end
@@ -64,7 +75,11 @@ M.init = function(config)
   M.config = vim.tbl_deep_extend('force', M.config, config)
 end
 
-M.sort = function()
+--- Main function of sorter, by default sorts current line under
+---@param opts SorterOpts
+M.sort = function(opts)
+  opts = opts or {}
+
   local bufnr = vim.api.nvim_get_current_buf()
   local filetype = vim.bo[bufnr].filetype
   local sortables = M.config[filetype]
@@ -87,7 +102,7 @@ M.sort = function()
     return
   end
 
-  local sorted_lines = get_sorted_lines(sortable_lines)
+  local sorted_lines = get_sorted_lines(sortable_lines, opts)
 
   place_sorted_lines_in_pos(sorted_lines, original_positions)
 end
