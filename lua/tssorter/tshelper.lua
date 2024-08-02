@@ -126,13 +126,34 @@ local function remove_whitespace(lines, curr_range)
   return new_ranges
 end
 
+--- Returns true if node matches the passed config
+---@param node TSNode
+---@param sortable_config SortableOpts
+---@return boolean
+local function node_matches_sortable(node, sortable_config)
+  local possible_nodes = sortable_config.node
+  if type(possible_nodes) ~= 'table' then
+    possible_nodes = { possible_nodes }
+  end
+
+  return vim.tbl_contains(possible_nodes, node:type())
+end
+
+---@param sortables Sortable
+---@return TSNode?
 local function find_nearest_sortable(sortables)
   local node = vim.treesitter.get_node()
 
   while node do
-    if vim.tbl_contains(sortables, node:type()) then
-      logger.info('Sorting by type', { type = node:type() })
-      return node
+    for name, sortable_config in pairs(sortables) do
+      if node_matches_sortable(node, sortable_config) then
+        logger.info('Matched node with sortable', {
+          sortable_name = name,
+          node_type = node:type(),
+        })
+
+        return node
+      end
     end
     node = node:parent()
   end
@@ -163,6 +184,7 @@ local function get_node_text(nodes)
 end
 
 --- Look for the nearest sortable under the current node
+---@param sortables Sortable
 M.find_sortables = function(sortables)
   local sortable_node = find_nearest_sortable(sortables)
 
@@ -174,7 +196,7 @@ M.find_sortables = function(sortables)
   local parent = sortable_node:parent()
 
   if not parent then
-    logger.warn("Sotable node doesn't have a parent??")
+    logger.warn('Invalid orphan node, needs parent to iterate through sibling nodes')
     return
   end
 

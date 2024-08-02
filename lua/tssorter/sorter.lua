@@ -1,10 +1,9 @@
--- NOTE: when working on this make sure to enable the plugin in the config file as it's disabled by default
-
 local tshelper = require('tssorter.tshelper')
 local logger = require('tssorter.logger')
 
 local M = {}
 
+---@type Sortable
 M.config = {}
 
 --- Returns the nodes in a sorted order
@@ -60,6 +59,7 @@ local function place_sorted_lines_in_pos(sorted_lines, positions)
   -- TODO: clean up extmarks
 end
 
+---@param config Sortable
 M.init = function(config)
   M.config = vim.tbl_deep_extend('force', M.config, config)
 end
@@ -67,9 +67,14 @@ end
 M.sort = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local filetype = vim.bo[bufnr].filetype
-  local sortables = M.config[filetype].sortables
+  local sortables = M.config[filetype]
 
-  -- FIX: what happens if null is returned in the find_sortables function and I'm trying to receive 2 returns???
+  logger.trace('Finding sortables', {
+    bufnr = bufnr,
+    filetype = filetype,
+    sortables = sortables,
+  })
+
   local sortable_lines, original_positions = tshelper.find_sortables(sortables)
 
   logger.trace(

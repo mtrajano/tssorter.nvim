@@ -1,13 +1,22 @@
 local M = {}
 
--- TODO: these should come from configs
-local global_level = vim.log.levels.TRACE
-local outfile = '/tmp/sorterlog'
+---@class LoggerOpts
+---@field level number
+---@field outfile string?
+
+local log_level
+local outfile
+
+---@param opts LoggerOpts
+M.init = function(opts)
+  log_level = opts.level
+  outfile = opts.outfile
+end
 
 M.log = function(message, level, context)
   level = level or vim.log.levels.WARN
 
-  if level < global_level then
+  if level < log_level then
     return
   end
 
