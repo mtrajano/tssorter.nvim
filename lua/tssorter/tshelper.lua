@@ -2,6 +2,8 @@ local logger = require('tssorter.logger')
 
 local M = {}
 
+---@alias position {s_line: number, s_col: number, e_row: number, e_col: number}
+
 local function find_top_line(lines, curr_range)
   local curr_top_line = curr_range[1]
 
@@ -140,6 +142,7 @@ local function node_matches_sortable(node, sortable_config)
 end
 
 ---@param sortables Sortable
+---@return string? sortable_name
 ---@return TSNode?
 local function find_nearest_sortable(sortables)
   local node = vim.treesitter.get_node()
@@ -152,14 +155,17 @@ local function find_nearest_sortable(sortables)
           node_type = node:type(),
         })
 
-        return node
+        return name, node
       end
     end
     node = node:parent()
   end
 end
 
-local function get_nodes_positions(nodes)
+--- Get the node positions without
+---@param nodes TSNode[]
+---@return position[] positions
+M.get_positions = function(nodes)
   local bufnr = vim.api.nvim_get_current_buf()
 
   return vim
@@ -172,21 +178,20 @@ local function get_nodes_positions(nodes)
     :totable()
 end
 
-local function get_node_text(nodes)
+--- Returns the nodes text
+---@param node TSNode
+---@return string
+M.get_text = function(node)
   local bufnr = vim.api.nvim_get_current_buf()
-
-  return vim
-    .iter(nodes)
-    :map(function(node)
-      return vim.treesitter.get_node_text(node, bufnr)
-    end)
-    :totable()
+  return vim.treesitter.get_node_text(node, bufnr)
 end
 
 --- Look for the nearest sortable under the current node
 ---@param sortables Sortable
+---@return string? sortable_name
+---@return TSNode[]?
 M.find_sortables = function(sortables)
-  local sortable_node = find_nearest_sortable(sortables)
+  local name, sortable_node = find_nearest_sortable(sortables)
 
   if not sortable_node then
     logger.warn('No sortable node under the cursor')
@@ -209,7 +214,7 @@ M.find_sortables = function(sortables)
     end
   end
 
-  return get_node_text(sortable_nodes), get_nodes_positions(sortable_nodes)
+  return name, sortable_nodes
 end
 
 return M

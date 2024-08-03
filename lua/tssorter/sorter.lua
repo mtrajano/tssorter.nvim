@@ -4,22 +4,53 @@ local logger = require('tssorter.logger')
 local M = {}
 
 ---@class SorterOpts
----@field sortable string?
----@field reverse boolean?
+---@field sortable? string
+---@field reverse? boolean
+---@field order_by? fun(node1: TSNode, node2: TSNode): boolean
 
----@type Sortable
+---@alias SortableCfg { [string]: SortableList }
+---@alias SortableList { [string]: SortableOpts }
+
+---@class SortableOpts
+---@field node? string|string[]
+---@field ordinal? string
+---@field order_by? string[]|function
+
+---@type SortableCfg
 M.config = {}
 
+--- Return a list of lines from the given nodes
+---@param nodes TSNode[]
+---@return string[]
+local function get_node_lines(nodes)
+  return vim
+    .iter(nodes)
+    :map(function(node)
+      return tshelper.get_text(node)
+    end)
+    :totable()
+end
+
+--- Default sort function simply sorts the text alphabetically
+---@param node1 TSNode
+---@param node2 TSNode
+---@return boolean # Return true if the node1 comes before node2
+local function default_sort(node1, node2)
+  local line1 = tshelper.get_text(node1)
+  local line2 = tshelper.get_text(node2)
+
+  return vim.trim(line1) < vim.trim(line2)
+end
+
 --- Returns the retrieved lines in a sorted order
----@param lines string[]
+---@param nodes TSNode[]
 ---@param opts SorterOpts
 ---@return string[]
-local function get_sorted_lines(lines, opts)
-  -- TODO: provide other abilities for sorting such as custom sort functions, etc..
-  table.sort(lines, function(val1, val2)
-    -- TODO: this should probably be handled by the ordinal TSNode
-    return vim.trim(val1) < vim.trim(val2)
-  end)
+local function get_sorted_lines(nodes, opts)
+  local order_by = opts.order_by or default_sort
+
+  table.sort(nodes, order_by)
+  local lines = get_node_lines(nodes)
 
   if opts.reverse then
     lines = vim.iter(lines):rev():totable()
@@ -46,7 +77,6 @@ end
 -- TODO: move to tsutils helper
 local function place_sorted_lines_in_pos(sorted_lines, positions)
   local bufnr = vim.api.nvim_get_current_buf()
-  local it = vim.iter(sorted_lines)
   local marks = get_position_marks(positions)
   local namespaces = vim.api.nvim_get_namespaces()
   local ns_id = namespaces['tssorter']
@@ -70,7 +100,7 @@ local function place_sorted_lines_in_pos(sorted_lines, positions)
   -- TODO: clean up extmarks
 end
 
----@param config Sortable
+---@param config SortableCfg
 M.init = function(config)
   M.config = vim.tbl_deep_extend('force', M.config, config)
 end
@@ -90,19 +120,21 @@ M.sort = function(opts)
     sortables = sortables,
   })
 
-  local sortable_lines, original_positions = tshelper.find_sortables(sortables)
+  local sortable_name, sortable_nodes = tshelper.find_sortables(sortables)
 
-  logger.trace(
-    'Returned from find_sortables',
-    { sortable_lines = sortable_lines, original_positions = original_positions }
-  )
+  logger.trace('Returned from find_sortables', { num_nodes = #sortable_nodes })
 
-  if not sortable_lines then
+  if not sortable_name or not sortable_nodes or vim.tbl_isempty(sortable_nodes) then
     logger.warn('No sortable node under cursor')
     return
   end
 
-  local sorted_lines = get_sorted_lines(sortable_lines, opts)
+  -- merge any extra config from the sortable such as custom sorter, etc...
+  local sortable_config = sortables[sortable_name]
+  opts = vim.tbl_deep_extend('keep', opts, sortable_config)
+
+  local original_positions = tshelper.get_positions(sortable_nodes)
+  local sorted_lines = get_sorted_lines(sortable_nodes, opts)
 
   place_sorted_lines_in_pos(sorted_lines, original_positions)
 end
