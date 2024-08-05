@@ -6,7 +6,6 @@ local M = {}
 ---@class SorterOpts
 ---@field sortable? string
 ---@field reverse? boolean
----@field order_by? fun(node1: TSNode, node2: TSNode): boolean
 
 ---@alias SortableCfg { [string]: SortableList }
 ---@alias SortableList { [string]: SortableOpts }
