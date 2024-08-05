@@ -39,7 +39,7 @@ local function default_sort(node1, node2)
   local line1 = tshelper.get_text(node1)
   local line2 = tshelper.get_text(node2)
 
-  return vim.trim(line1) < vim.trim(line2)
+  return line1 < line2
 end
 
 --- Returns the retrieved lines in a sorted order
@@ -85,8 +85,6 @@ local function place_sorted_lines_in_pos(sorted_lines, positions)
     local extmark_id = marks[i]
     local extmark = vim.api.nvim_buf_get_extmark_by_id(bufnr, ns_id, extmark_id, { details = true })
 
-    line = vim.trim(line)
-
     local lines = vim.split(line, '\n')
 
     logger.trace('Setting sorted line in position', {
@@ -122,7 +120,7 @@ M.sort = function(opts)
 
   local sortable_name, sortable_nodes = tshelper.find_sortables(sortables)
 
-  logger.trace('Returned from find_sortables', { num_nodes = #sortable_nodes })
+  logger.trace('Returned from find_sortables', { num_nodes = sortable_nodes and #sortable_nodes or 0 })
 
   if not sortable_name or not sortable_nodes or vim.tbl_isempty(sortable_nodes) then
     logger.warn('No sortable node under cursor')

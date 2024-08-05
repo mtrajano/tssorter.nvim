@@ -141,7 +141,7 @@ local function node_matches_sortable(node, sortable_config)
   return vim.tbl_contains(possible_nodes, node:type())
 end
 
----@param sortables Sortable
+---@param sortables SortableCfg
 ---@return string? sortable_name
 ---@return TSNode?
 local function find_nearest_sortable(sortables)
@@ -183,11 +183,13 @@ end
 ---@return string
 M.get_text = function(node)
   local bufnr = vim.api.nvim_get_current_buf()
-  return vim.treesitter.get_node_text(node, bufnr)
+  local lines = vim.treesitter.get_node_text(node, bufnr)
+
+  return vim.trim(lines)
 end
 
 --- Look for the nearest sortable under the current node
----@param sortables Sortable
+---@param sortables SortableCfg
 ---@return string? sortable_name
 ---@return TSNode[]?
 M.find_sortables = function(sortables)
