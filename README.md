@@ -3,6 +3,8 @@
 Sort *almost any* structured text in Neovim using TSSorter, a sorter for Neovim based on Treesitter nodes. This plugin looks for the nearest configured sortable under the cursor and sorts them under the common parent node, maintaining your original
 document structure! It strives to work out of the box with minimal configuration. Please see below for examples:
 
+![example](https://github.com/user-attachments/assets/e8d09a69-c1ff-42e9-b2d9-07b04cbb8e7b)
+
 **Note that this plugin is still in the early stages and highly experimental. Breaking changes and bugs should be expected**
 If you find any bugs please submit an issue.
 
