@@ -1,13 +1,9 @@
 local M = {}
 
----@class LoggerOpts
----@field level number
----@field outfile string?
-
 local log_level
 local outfile
 
----@param opts LoggerOpts
+---@param opts LoggerCfg
 M.init = function(opts)
   log_level = opts.level
   outfile = opts.outfile

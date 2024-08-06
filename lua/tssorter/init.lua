@@ -1,14 +1,14 @@
 local sorter = require('tssorter.sorter')
 local logger = require('tssorter.logger')
-
----@class LanguageOpts
----@field sortables string[]
+local config = require('tssorter.config')
 
 local M = {}
 
+---@param opts Config?
 M.setup = function(opts)
+  opts = config.setup(opts)
+
   logger.init(opts.logger)
-  sorter.init(opts.sortables)
 end
 
 M.sort = sorter.sort

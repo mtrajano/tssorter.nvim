@@ -1,19 +1,12 @@
 local tshelper = require('tssorter.tshelper')
 local logger = require('tssorter.logger')
+local config = require('tssorter.config')
 
 local M = {}
 
 ---@class SorterOpts
 ---@field sortable? string
 ---@field reverse? boolean
-
----@alias SortableCfg { [string]: SortableList }
----@alias SortableList { [string]: SortableOpts }
-
----@class SortableOpts
----@field node? string|string[]
----@field ordinal? string
----@field order_by? string[]|function
 
 ---@type SortableCfg
 M.config = {}
@@ -43,7 +36,7 @@ end
 
 --- Returns the retrieved lines in a sorted order
 ---@param nodes TSNode[]
----@param opts SorterOpts
+---@param opts SorterOpts | SortableOpts
 ---@return string[]
 local function get_sorted_lines(nodes, opts)
   local order_by = opts.order_by or default_sort
@@ -94,12 +87,7 @@ local function place_sorted_lines_in_pos(sorted_lines, positions)
     vim.api.nvim_buf_set_text(bufnr, extmark[1], extmark[2], extmark[3].end_row, extmark[3].end_col, lines)
   end
 
-  -- TODO: clean up extmarks
-end
-
----@param config SortableCfg
-M.init = function(config)
-  M.config = vim.tbl_deep_extend('force', M.config, config)
+  -- TODO: clean up extmarks?
 end
 
 --- Main function of sorter, by default sorts current line under
@@ -109,7 +97,12 @@ M.sort = function(opts)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local filetype = vim.bo[bufnr].filetype
-  local sortables = M.config[filetype]
+  local sortables = config.get_sortables_for_ft(filetype)
+
+  if not sortables then
+    logger.warn('No sortables configured for current filetype!')
+    return
+  end
 
   logger.trace('Finding sortables', {
     bufnr = bufnr,

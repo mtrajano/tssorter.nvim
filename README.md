@@ -50,8 +50,7 @@ use {
 
 ## Default Configuration
 
-<!-- TODO: add link for default config once we add a config.lua -->
-The default included sortables can be found [here]() which should give you an idea of how to configure your own.
+The default included sortables can be found [here](https://github.com/mtrajano/tssorter.nvim/blob/main/lua/tssorter/config.lua) which should give you an idea of how to configure your own.
 Here is an explanation of what each key means:
 
 ```lua

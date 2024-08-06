@@ -2,7 +2,7 @@ local logger = require('tssorter.logger')
 
 local M = {}
 
----@alias position {s_line: number, s_col: number, e_row: number, e_col: number}
+---@alias NodeRange {s_line: number, s_col: number, e_row: number, e_col: number}
 
 local function find_top_line(lines, curr_range)
   local curr_top_line = curr_range[1]
@@ -164,7 +164,7 @@ end
 
 --- Get the node positions without
 ---@param nodes TSNode[]
----@return position[] positions
+---@return NodeRange[] positions
 M.get_positions = function(nodes)
   local bufnr = vim.api.nvim_get_current_buf()
 
