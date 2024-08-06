@@ -85,6 +85,8 @@ local function place_sorted_lines_in_pos(sorted_lines, positions)
     })
 
     vim.api.nvim_buf_set_text(bufnr, extmark[1], extmark[2], extmark[3].end_row, extmark[3].end_col, lines)
+
+    vim.cmd([[silent! undojoin]])
   end
 
   -- TODO: clean up extmarks?
