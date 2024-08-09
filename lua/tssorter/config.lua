@@ -12,11 +12,11 @@ local M = {}
 ---@field level? number
 ---@field outfile? string?
 
----@class Config
+---@class TssorterOpts
 ---@field sortables? SortableCfg
 ---@field logger? LoggerCfg
 
----@type Config
+---@type TssorterOpts
 -- TODO: add any more defaults that would make sense having out of the box
 M.default_config = {
   sortables = {
@@ -86,14 +86,14 @@ M.default_config = {
   },
 }
 
----@param opts Config?
+---@param opts TssorterOpts?
 M.setup = function(opts)
   opts = opts or {}
   M.default_config = vim.tbl_deep_extend('force', M.default_config, opts)
   return M.default_config
 end
 
----@return Config
+---@return TssorterOpts
 M.get_config = function()
   return M.default_config
 end
