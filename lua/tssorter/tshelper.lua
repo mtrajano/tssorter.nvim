@@ -138,6 +138,11 @@ local function node_matches_sortable(node, sortable_config)
     possible_nodes = { possible_nodes }
   end
 
+  logger.trace('Trying to match node type', {
+    node_type = node:type(),
+    possible_nodes = possible_nodes,
+  })
+
   return vim.tbl_contains(possible_nodes, node:type())
 end
 
@@ -145,7 +150,7 @@ end
 ---@return string? sortable_name
 ---@return TSNode?
 local function find_nearest_sortable(sortables)
-  local node = vim.treesitter.get_node()
+  local node = vim.treesitter.get_node { ignore_injections = false }
 
   while node do
     for name, sortable_config in pairs(sortables) do
