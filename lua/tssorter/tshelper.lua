@@ -224,4 +224,53 @@ M.find_sortables = function(sortables)
   return name, sortable_nodes
 end
 
+--- Return the first nested child of this type
+---@param node TSNode
+---@param node_type string|string[]
+---@return TSNode?
+M.get_nested_child = function(node, node_type)
+  if type(node_type) == 'string' then
+    node_type = { node_type }
+  end
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filetype = vim.bo[bufnr].filetype
+
+  local log_context = {
+    current_node = {
+      node:type(),
+      { node:range() },
+    },
+    ordinal_types = node_type,
+  }
+
+  logger.trace('Looking for ordinal in node', log_context)
+
+  for _, type in ipairs(node_type) do
+    local query_str = string.format('(%s) @ordinal', type)
+
+    -- FIX: for parse() need to get language on current node (in case of injected_language) rather than current buffer filetype
+    -- NOTE: this can potentially error out if there's an invalid node (not part of language tree) in the list, consider adding a pcall here?
+    local query = vim.treesitter.query.parse(filetype, query_str)
+
+    -- take first capture
+    local _, child = query:iter_captures(node, bufnr)()
+
+    if child then
+      logger.info(
+        'Found nested child',
+        vim.tbl_extend('force', log_context, {
+          found_type = child:type(),
+        })
+      )
+
+      return child
+    end
+  end
+
+  logger.info('None of the possible types were found under the current node', log_context)
+
+  return nil
+end
+
 return M

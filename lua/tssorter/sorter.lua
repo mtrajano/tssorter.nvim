@@ -8,9 +8,6 @@ local M = {}
 ---@field sortable? string
 ---@field reverse? boolean
 
----@type SortableCfg
-M.config = {}
-
 --- Return a list of lines from the given nodes
 ---@param nodes TSNode[]
 ---@return string[]
@@ -23,11 +20,35 @@ local function get_node_lines(nodes)
     :totable()
 end
 
---- Default sort function simply sorts the text alphabetically
+--- Return a list of ordinal text for this node
+---@param node TSNode
+---@param ordinal string|string[]
+---@return string
+local function get_ordinal_text(node, ordinal)
+  local child_node = tshelper.get_nested_child(node, ordinal)
+
+  if not child_node then
+    logger.warn(
+      'Ordinal node was not found in given node defaulting to empty string',
+      { node_type = node:type(), ordinal = ordinal }
+    )
+    return '' -- FIX: is this the best way to handle when the nested ordinal is not found? Consider adding option for default value
+  end
+
+  return tshelper.get_text(child_node)
+end
+
+--- Default sort function simply sorts the text alphabetically with optinal ordinal nodes
 ---@param node1 TSNode
 ---@param node2 TSNode
+---@param ordinal1 string If a nested ordinal node was specified this is for node1
+---@param ordinal2 string If a nested ordinal node was specified this is for node1
 ---@return boolean # Return true if the node1 comes before node2
-local function default_sort(node1, node2)
+local function default_sort(node1, node2, ordinal1, ordinal2)
+  if ordinal1 and ordinal2 then
+    return ordinal1 < ordinal2
+  end
+
   local line1 = tshelper.get_text(node1)
   local line2 = tshelper.get_text(node2)
 
@@ -41,7 +62,17 @@ end
 local function get_sorted_lines(nodes, opts)
   local order_by = opts.order_by or default_sort
 
-  table.sort(nodes, order_by)
+  table.sort(nodes, function(node1, node2)
+    local ordinal1, ordinal2
+    if opts.ordinal then
+      vim.print { type = node1:type(), ordinal = opts.ordinal }
+      ordinal1 = get_ordinal_text(node1, opts.ordinal)
+      ordinal2 = get_ordinal_text(node2, opts.ordinal)
+    end
+
+    return order_by(node1, node2, ordinal1, ordinal2)
+  end)
+
   local lines = get_node_lines(nodes)
 
   if opts.reverse then
