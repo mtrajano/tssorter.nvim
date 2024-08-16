@@ -52,7 +52,7 @@ M.default_config = {
       },
       task_status = {
         node = 'list_item',
-        ordinal = { 'task_list_marker_unchecked', 'task_list_marker_checked' }, -- TODO: these two are conflicting, need to add user commands so user is able to specify which one he wants to sort by
+        ordinal = { 'task_list_marker_unchecked', 'task_list_marker_checked' },
       },
       headers = {
         node = 'section',
@@ -136,10 +136,24 @@ M.get_config = function()
   return M.default_config
 end
 
+--- Get sortables for a filetype
 ---@param filetype string
 ---@return SortableCfg?
-M.get_sortables_for_ft = function(filetype)
+M.get_sortables_by_filetype = function(filetype)
   return M.get_config().sortables[filetype]
+end
+
+--- GEt a specific sortable by name
+---@param filetype string
+---@param name string
+---@return SortableCfg?
+M.get_sortables_by_name = function(filetype, name)
+  local sortables = M.get_sortables_by_filetype(filetype)
+
+  local sortable = sortables and sortables[name] or nil
+
+  -- in order to mimic structure of getting sortables by filetype
+  return sortable and { name = sortable } or nil
 end
 
 return M

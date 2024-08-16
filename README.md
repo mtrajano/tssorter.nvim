@@ -108,17 +108,30 @@ The method also takes some optional parameters to control which direction to sor
 ```lua
 require('tssorter').sort({
     reverse = true -- sort in reverse order
+    sortable = 'heading' -- find this specific sortable nearest to the cursor
 })
 ```
+
+## Command
+
+For ease of use there is also a `TSSort` command available to you. You may find this easier to you specially when specifying
+sortable options. Note that for now you need to explicitly specify which sortable you want to sort by.
+
+```vim
+:TSSort heading reverse=true
+```
+
+In the example above only the heading sortable name is required. 
 
 You may add your own keybindings to make it easier to call these.
 
 # Examples
 
 For brevity I am not including the entire configuration. Assume that these are all included under the appropriate
-filetype in the sortables config key. See above for more details on configuration. Also note that for now all sortables must
-include a sortable name as a key. This will help with future plans to have something like `:TSSorter heading` to sort
-all the headings in a given file.
+filetype in the sortables config key. See above for more details on configuration. Also note that for now all sortables **must
+include a sortable name as a key**. This is so that you are able to specify which sortable you want to sort by. Specifying the key
+can prevent ambiguity when sorting the same node with different ordinals and ordering rules. For example, having the ability 
+to specify that you want to sort headers with `:TSSorter heading`.
 
 ## Sorting CSS properties
 ```lua

@@ -65,7 +65,6 @@ local function get_sorted_lines(nodes, opts)
   table.sort(nodes, function(node1, node2)
     local ordinal1, ordinal2
     if opts.ordinal then
-      vim.print { type = node1:type(), ordinal = opts.ordinal }
       ordinal1 = get_ordinal_text(node1, opts.ordinal)
       ordinal2 = get_ordinal_text(node2, opts.ordinal)
     end
@@ -130,7 +129,13 @@ M.sort = function(opts)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local filetype = vim.bo[bufnr].filetype
-  local sortables = config.get_sortables_for_ft(filetype)
+
+  local sortables
+  if opts.sortable then
+    sortables = config.get_sortables_by_name(filetype, opts.sortable)
+  else
+    sortables = config.get_sortables_by_filetype(filetype)
+  end
 
   if not sortables then
     logger.warn('No sortables configured for current filetype!')
