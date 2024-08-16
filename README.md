@@ -14,7 +14,7 @@ If you find any bugs please submit an issue.
 
 TSsorter supports the latest stable release of Neovim, currently version `0.10.1.` Other versions may work but are not guaranteed.
 
-This plugin depends on Treesitter so make sure to install the parser for the filetype you are trying to configure!  
+This plugin depends on Treesitter so make sure to install the parser for the filetype you are trying to configure!
 
 You can install using your favorite package manager, here are a few examples:
 
@@ -24,12 +24,12 @@ You can install using your favorite package manager, here are a few examples:
 {
     'mtrajano/tssorter.nvim',
     version = '*', -- latest stable version, use `main` to keep up with the latest changes
-    config = function()
-        require('tssorter').setup({
-            -- leave empty for the default config or define your own sortables in here. They will add, rather than
-            -- replace, the defaults for the given filetype
-        })
-    end
+    ---@module "tssorter"
+    ---@type TssorterOpts
+    opts = {
+        -- leave empty for the default config or define your own sortables in here. They will add, rather than
+        -- replace, the defaults for the given filetype
+    }
 }
 ```
 
@@ -39,11 +39,11 @@ You can install using your favorite package manager, here are a few examples:
 use {
     'mtrajano/tssorter.nvim',
     tag = '*', -- latest stable version, use `main` to keep up with the latest changes
-    config = function() 
+    config = function()
         require('tssorter').setup({
             -- leave empty for the default config or define your own sortables in here. They will add, rather than
             -- replace, the defaults for the given filetype
-        }) 
+        })
     end
   }
 ```
@@ -97,7 +97,7 @@ Here is an explanation of what each key means:
 
 ## Lua API
 
-By default simply calling `sort` should sort the nearest sortable under the cursor. 
+By default simply calling `sort` should sort the nearest sortable under the cursor.
 
 ```lua
 require('tssorter').sort()
@@ -190,5 +190,5 @@ itself!
 
 # Contribution
 
-See an interesting use case you don't see mentioned here or that is not yet implemented? Create an issue or submit a pr! 
+See an interesting use case you don't see mentioned here or that is not yet implemented? Create an issue or submit a pr!
 Any help adding documentation would also be appreciated.

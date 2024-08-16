@@ -1,22 +1,22 @@
 local M = {}
 
----@class Config
----@field sortables? SortableCfg
----@field logger? LoggerCfg
-
----@alias SortableCfg { [string]: SortableList }
----@alias SortableList { [string]: SortableOpts }
-
 ---@class SortableOpts
 ---@field node? string|string[]
 ---@field ordinal? string|string[]
 ---@field order_by? function
 
+---@alias SortableCfg { [string]: SortableList }
+---@alias SortableList { [string]: SortableOpts }
+
 ---@class LoggerCfg
 ---@field level? number
 ---@field outfile? string?
 
----@type Config
+---@class TssorterOpts
+---@field sortables? SortableCfg
+---@field logger? LoggerCfg
+
+---@type TssorterOpts
 -- TODO: add any more defaults that would make sense having out of the box
 M.default_config = {
   sortables = {
@@ -122,7 +122,7 @@ M.default_config = {
   },
 }
 
----@param opts Config?
+---@param opts TssorterOpts?
 M.setup = function(opts)
   opts = opts or {}
   -- FIX: what happens if the sortable the user wants to specify conflicts with one of the sortables? We need to give a
@@ -131,7 +131,7 @@ M.setup = function(opts)
   return M.default_config
 end
 
----@return Config
+---@return TssorterOpts
 M.get_config = function()
   return M.default_config
 end

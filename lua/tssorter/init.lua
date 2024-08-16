@@ -5,7 +5,7 @@ local command = require('tssorter.command')
 
 local M = {}
 
----@param opts Config?
+---@param opts TssorterOpts?
 M.setup = function(opts)
   opts = config.setup(opts)
 
