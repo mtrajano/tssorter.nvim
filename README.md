@@ -184,7 +184,7 @@ itself!
 - [ ] Tests
 - [ ] Look into query `.scm` files
 - [ ] Sort recursively
-- [ ] Sort based on a configurable inner node, example
+- [x] Sort based on a configurable inner node, example
     * Sort function based on the identifier (function_name)
     * Inner text of the markdown list (rather than the whole list)
 

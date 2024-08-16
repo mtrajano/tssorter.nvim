@@ -150,7 +150,7 @@ end
 ---@return string? sortable_name
 ---@return TSNode?
 local function find_nearest_sortable(sortables)
-  local node = vim.treesitter.get_node { ignore_injections = false }
+  local node = vim.treesitter.get_node({ ignore_injections = false })
 
   while node do
     for name, sortable_config in pairs(sortables) do
