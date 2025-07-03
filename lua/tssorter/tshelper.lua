@@ -193,15 +193,88 @@ M.get_text = function(node)
   return vim.trim(lines)
 end
 
+--- stolen from vim.treesitter._range
+---@param a_row integer
+---@param a_col integer
+---@param b_row integer
+---@param b_col integer
+---@return integer
+--- 1: a > b
+--- 0: a == b
+--- -1: a < b
+local function cmp_pos(a_row, a_col, b_row, b_col)
+  if a_row == b_row then
+    if a_col > b_col then
+      return 1
+    elseif a_col < b_col then
+      return -1
+    else
+      return 0
+    end
+  elseif a_row > b_row then
+    return 1
+  end
+
+  return -1
+end
+
+--- stolen from vim.treesitter._range
+---@param r Range
+---@return integer, integer, integer, integer
+local function unpack4(r)
+  if #r == 2 then
+    return r[1], 0, r[2], 0
+  end
+  local off_1 = #r == 6 and 1 or 0
+  return r[1], r[2], r[3 + off_1], r[4 + off_1]
+end
+
+--- stolen from vim.treesitter._range
+---@param r1 Range
+---@param r2 Range
+---@return boolean whether r1 contains r2
+local function contains(r1, r2)
+  local srow_1, scol_1, erow_1, ecol_1 = unpack4(r1)
+  local srow_2, scol_2, erow_2, ecol_2 = unpack4(r2)
+
+  -- start doesn't fit
+  if cmp_pos(srow_1, scol_1, srow_2, scol_2) == 1 then
+    return false
+  end
+
+  -- end doesn't fit
+  if cmp_pos(erow_1, ecol_1, erow_2, ecol_2) == -1 then
+    return false
+  end
+
+  return true
+end
+
 --- Look for the nearest sortable under the current node
 ---@param sortables SortableCfg
+---@param range? Range
 ---@return string? sortable_name
 ---@return TSNode[]?
-M.find_sortables = function(sortables)
+M.find_sortables = function(sortables, range)
   local name, sortable_node = find_nearest_sortable(sortables)
 
   if not sortable_node then
     logger.warn('No sortable node under the cursor')
+    return
+  end
+
+  local in_range = function()
+    return true
+  end
+  if range then
+    ---@param node TSNode
+    in_range = function(node)
+      return contains(range, vim.treesitter.get_range(node))
+    end
+  end
+
+  if not in_range(sortable_node) then
+    logger.warn('Node out of range')
     return
   end
 
@@ -216,7 +289,7 @@ M.find_sortables = function(sortables)
   local target_type = sortable_node:type()
 
   for possible_sortable in parent:iter_children() do
-    if possible_sortable:type() == target_type then
+    if possible_sortable:type() == target_type and in_range(possible_sortable) then
       table.insert(sortable_nodes, possible_sortable)
     end
   end

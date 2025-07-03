@@ -109,6 +109,8 @@ The method also takes some optional parameters to control which direction to sor
 require('tssorter').sort({
     reverse = true -- sort in reverse order
     sortable = 'heading' -- find this specific sortable nearest to the cursor
+    range = 'paragraph' -- sort within the current paragraph
+    -- range = { 0, 0, 0, 0 } -- ... or within an arbitrary vim.treesitter Range
 })
 ```
 

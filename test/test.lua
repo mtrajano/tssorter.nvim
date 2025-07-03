@@ -5,6 +5,7 @@ local array_vals = { 'val1', 'first item', 'zee last item', 'some middle item' }
 local array_vals = {
   'val1',
   'first item',
+
   'zee last item',
   'some middle item',
 }

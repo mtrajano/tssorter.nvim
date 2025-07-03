@@ -7,6 +7,7 @@ local M = {}
 ---@class SorterOpts
 ---@field sortable? string
 ---@field reverse? boolean
+---@field range? 'paragraph' | Range
 
 --- Return a list of lines from the given nodes
 ---@param nodes TSNode[]
@@ -122,6 +123,29 @@ local function place_sorted_lines_in_pos(sorted_lines, positions)
   -- TODO: clean up extmarks?
 end
 
+---@return Range
+local function get_current_paragraph()
+  local function not_empty(row)
+    local line = vim.api.nvim_buf_get_lines(0, row, row + 1, false)[1]
+    return line ~= nil and line ~= ''
+  end
+
+  local current_line = vim.api.nvim_win_get_cursor(0)[1] - 1 -- 1->0 indexed
+  local start_line = current_line
+  local end_line = current_line
+
+  if not_empty(current_line) then
+    while start_line > 0 and not_empty(start_line - 1) do -- don't wrap around to end, inclusive
+      start_line = start_line - 1
+    end
+    while not_empty(end_line) do -- exclusive
+      end_line = end_line + 1
+    end
+  end
+
+  return { start_line, end_line }
+end
+
 --- Main function of sorter, by default sorts current line under
 ---@param opts SorterOpts
 M.sort = function(opts)
@@ -148,7 +172,15 @@ M.sort = function(opts)
     sortables = sortables,
   })
 
-  local sortable_name, sortable_nodes = tshelper.find_sortables(sortables)
+  ---@type Range
+  local range
+  if opts.range == 'paragraph' then
+    range = get_current_paragraph()
+  else
+    range = opts.range
+  end
+
+  local sortable_name, sortable_nodes = tshelper.find_sortables(sortables, range)
 
   logger.trace('Returned from find_sortables', { num_nodes = sortable_nodes and #sortable_nodes or 0 })
 
